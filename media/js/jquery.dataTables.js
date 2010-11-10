@@ -1217,6 +1217,7 @@
 			 * Scope:    jQuery.dataTable.classSettings
 			 */
 			this.sCookiePrefix = "SpryMedia_DataTables_";
+			this.sCookieName = null;
 			
 			/*
 			 * Variable: fnCookieCallback
@@ -1696,7 +1697,7 @@
 			nNewRow.appendChild( nNewCell );
 			nNewCell.className = sClass;
 			nNewCell.colSpan = _fnVisbleColumns( oSettings );
-			nNewCell.innerHTML = sHtml;
+            $(nNewCell).html(sHtml);
 			
 			/* If the nTr isn't on the page at the moment - then we don't insert at the moment */
 			var nTrs = $('tr', oSettings.nTBody);
@@ -1870,8 +1871,7 @@
 				iVisibleColumn = _fnColumnIndexToVisible( oSettings, iColumn );
 				if ( iVisibleColumn !== null )
 				{
-					oSettings.aoData[iRow].nTr.getElementsByTagName('td')[iVisibleColumn].innerHTML = 
-						sDisplay;
+					$(oSettings.aoData[iRow].nTr.getElementsByTagName('td')[iVisibleColumn]).html(sDisplay);
 				}
 			}
 			else
@@ -1906,8 +1906,7 @@
 					iVisibleColumn = _fnColumnIndexToVisible( oSettings, i );
 					if ( iVisibleColumn !== null )
 					{
-						oSettings.aoData[iRow].nTr.getElementsByTagName('td')[iVisibleColumn].innerHTML = 
-							sDisplay;
+						$(oSettings.aoData[iRow].nTr.getElementsByTagName('td')[iVisibleColumn]).html(sDisplay);
 					}
 				}
 			}
@@ -2598,7 +2597,7 @@
 							"aData": aData,
 							"oSettings": oSettings
 						} );
-					nTd.innerHTML = sRendered;
+					$(nTd).html(sRendered);
 					if ( oSettings.aoColumns[i].bUseRendered )
 					{
 						/* Use the rendered data for filtering/sorting */
@@ -2607,7 +2606,7 @@
 				}
 				else
 				{
-					nTd.innerHTML = aData[i];
+					$(nTd).html(aData[i]);
 				}
 				
 				/* Cast everything as a string - so we can treat everything equally when sorting */
@@ -5936,7 +5935,8 @@
 			
 			sValue += "}";
 			
-			_fnCreateCookie( oSettings.sCookiePrefix+oSettings.sInstance, sValue, 
+			var sCookieName = oSettings.sCookieName || oSettings.sCookiePrefix+oSettings.sInstance;
+			_fnCreateCookie(sCookieName, sValue, 
 				oSettings.iCookieDuration, oSettings.sCookiePrefix, oSettings.fnCookieCallback );
 		}
 		
@@ -5955,9 +5955,11 @@
 			}
 			
 			var oData, i, iLen;
-			var sData = _fnReadCookie( oSettings.sCookiePrefix+oSettings.sInstance );
+ 			var sCookieName = oSettings.sCookieName || oSettings.sCookiePrefix+oSettings.sInstance;
+ 			var sData = _fnReadCookie( sCookieName );
 			if ( sData !== null && sData !== '' )
 			{
+ 				oInit.bCookieSet = true;
 				/* Try/catch the JSON eval - if it is bad then we ignore it - note that 1.7.0 and before
 				 * incorrectly used single quotes for some strings - hence the replace below
 				 */
@@ -6523,6 +6525,7 @@
 				_fnMap( oSettings, oInit, "sAjaxSource" );
 				_fnMap( oSettings, oInit, "iCookieDuration" );
 				_fnMap( oSettings, oInit, "sCookiePrefix" );
+                _fnMap( oSettings, oInit, "sCookieName" );
 				_fnMap( oSettings, oInit, "sDom" );
 				_fnMap( oSettings, oInit, "oSearch", "oPreviousSearch" );
 				_fnMap( oSettings, oInit, "aoSearchCols", "aoPreSearchCols" );
